@@ -34,10 +34,15 @@ class SheetDataEntry:
     cellStart: (int, int) = (1, 1) # row, column
     cellEnd: (int, int) = (1, 1) # row, column
     name: str = "Empty Cell"
+<<<<<<< HEAD
     tableData: list[list[str]] = None
     data: list[str] | None = None
     size: (float, float) = None
     anchor: str = None
+=======
+    data: list[str] | None = None
+    size: (float, float) = None
+>>>>>>> 08692c939fdf1334661611f12797957a44de86f3
 
     def checkEntryType(self):
         match self.dataType:
@@ -59,6 +64,7 @@ class SheetDataEntry:
                 pass
             case SheetDataEnum.Table:
                 # todo
+<<<<<<< HEAD
                 (startRow, startColumn) = self.cellStart
                 (endRow, endColumn) = self.cellEnd
                 if(((endRow - startRow) < 2) or ((endColumn - startColumn) < 2) or (self.tableData == None)):
@@ -67,6 +73,11 @@ class SheetDataEntry:
             case SheetDataEnum.Image:
                 if((self.size == None) or (self.data == None) or (self.anchor == None)):
                     print("[warn] Content entered may not be consistent with entry Type { ", self.dataType.name, " }") 
+=======
+                pass
+            case SheetDataEnum.Image:
+
+>>>>>>> 08692c939fdf1334661611f12797957a44de86f3
                 pass
 
     def toCellStr(self, wb: Workbook) -> (str, str): # start, end
@@ -74,7 +85,11 @@ class SheetDataEntry:
         end = wb.active.cell(row = self.cellEnd[0], column = self.cellEnd[1]).coordinate
         return (start, end)
         
+<<<<<<< HEAD
 # don't worry about this, just for notes        
+=======
+        
+>>>>>>> 08692c939fdf1334661611f12797957a44de86f3
 """     
 def sumthing():
     xy = coordinate_from_string('A4') # returns ('A',4)
@@ -89,7 +104,12 @@ def sumthing():
 
 
 class ExcelSheetData(object):
+<<<<<<< HEAD
     entryList: list[SheetDataEntry] = []
+=======
+    
+    entryList: list[SheetDataEntry] 
+>>>>>>> 08692c939fdf1334661611f12797957a44de86f3
     filePath: str = None
     workBook = None
 
@@ -125,7 +145,11 @@ class ExcelSheetData(object):
     def insertEntry(self, data: SheetDataEntry):
         self.entryList.append(data)
 
+<<<<<<< HEAD
     def updateEntries(self):
+=======
+    def updateEntries(self, tableData: list[list[str]] = None, anchor: str = None):
+>>>>>>> 08692c939fdf1334661611f12797957a44de86f3
         print("[Updating Excel Sheet] ...")
         
         for entry in self.entryList:
@@ -133,6 +157,7 @@ class ExcelSheetData(object):
 
             match entry.dataType:
                 case SheetDataEnum.Cell:
+<<<<<<< HEAD
                     formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[0])
 
                 case SheetDataEnum.MergedCell:
@@ -155,10 +180,31 @@ class ExcelSheetData(object):
                             temp = list(entry.cellStart)
                             temp[1] += 1
                             entry.cellStart = tuple(temp)
+=======
+                    formatWrite(self.workBook, entry.style, (entry.toCellStr())[0], entry.data[0])
+
+                case SheetDataEnum.MergedCell:
+                    self.workBook.active.merge_cell((entry.toCellStr())[0], (entry.toCellStr())[1])
+                    formatWrite(self.workBook, entry.style, (entry.toCellStr())[0], entry.data[0])
+
+                case SheetDataEnum.Row:
+                    if (len(entry.data) == range(entry.cellEnd[1] - entry.cellStart[1])) or (len(entry.data) >= range(entry.cellEnd[1] - entry.cellStart[1])):
+                        for x in range(entry.cellEnd[1] - entry.cellStart[1]): # subtract columns
+                            formatWrite(self.workBook, entry.style, (entry.toCellStr())[0], entry.data[x - 1])
+                            entry.cellStart += 1
+                    elif len(entry.data) <= range(entry.cellEnd[1] - entry.cellStart[1]): # repeat last data for remaining cells
+                        for x in range(entry.cellEnd[1] - entry.cellStart[1]): # subtract columns
+                            if x > len(entry.data):
+                                formatWrite(self.workBook, entry.style, (entry.toCellStr())[1], entry.data[x - 1])
+                            else:
+                                formatWrite(self.workBook, entry.style, (entry.toCellStr())[0], entry.data[x - 1])
+                            entry.cellStart += 1
+>>>>>>> 08692c939fdf1334661611f12797957a44de86f3
                     elif entry.data == None:
                         pass
 
                 case SheetDataEnum.Column: 
+<<<<<<< HEAD
                     if (len(entry.data) == (entry.cellEnd[0] - entry.cellStart[0])) or (len(entry.data) >= (entry.cellEnd[0] - entry.cellStart[0])):
                         for x in range(entry.cellEnd[0] - entry.cellStart[0]): # subtract rows
                             formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1])
@@ -174,6 +220,19 @@ class ExcelSheetData(object):
                             temp = list(entry.cellStart)
                             temp[0] += 1
                             entry.cellStart = tuple(temp)
+=======
+                    if (len(entry.data) == range(entry.cellEnd[0] - entry.cellStart[0])) or (len(entry.data) >= range(entry.cellEnd[0] - entry.cellStart[0])):
+                        for x in range(entry.cellEnd[0] - entry.cellStart[0]): # subtract rows
+                            formatWrite(self.workBook, entry.style, (entry.toCellStr())[0], entry.data[x - 1])
+                            entry.cellStart += 1
+                    elif len(entry.data) <= range(entry.cellEnd[0] - entry.cellStart[0]): # repeat last data for remaining cells
+                        for x in range(entry.cellEnd[0] - entry.cellStart[0]): # subtract columns
+                            if x > len(entry.data):
+                                formatWrite(self.workBook, entry.style, (entry.toCellStr())[1], entry.data[x - 1])
+                            else:
+                                formatWrite(self.workBook, entry.style, (entry.toCellStr())[0], entry.data[x - 1])
+                            entry.cellStart += 1
+>>>>>>> 08692c939fdf1334661611f12797957a44de86f3
                     elif entry.data == None:
                         pass
 
@@ -182,17 +241,29 @@ class ExcelSheetData(object):
                         formatWrite(self.workBook, entry.style, self.workBook.active.cell(row = entry.cellStart[0], column = entry.cellStart[1] + 1).coordinate, value)
                     columnRange = entry.cellEnd[0] - entry.cellStart[0]
                     rowRange = entry.cellEnd[1] - entry.cellStart[1]
+<<<<<<< HEAD
                     for i, listValue in enumerate(entry.tableData, start = entry.cellStart[0]):
+=======
+                    for i, listValue in enumerate(tableData, start = entry.cellStart[0]):
+>>>>>>> 08692c939fdf1334661611f12797957a44de86f3
                         for j, value in enumerate(listValue, start = entry.cellStart[1]):
                             row = entry.cellStart[0] + i
                             column = entry.cellStart[1] + j
                             formatWrite(self.workBook, entry.style, self.workBook.active.cell(row = row, column = column).coordinate, value)
 
+<<<<<<< HEAD
                 case SheetDataEnum.Image: # Should work, still uncertain, very much "glue together and hope it works"
                     img = Image(entry.data[0]) # Should be image location
                     img.height = entry.size[0] # insert image height in pixels as float or int (e.g. 305.5) 
                     img.width = entry.size[1] # insert image width in pixels as float or int (e.g. 405.8)
                     img.anchor = entry.anchor # where you want image to be anchored/start from 'A1'
+=======
+                case SheetDataEnum.Image:
+                    img = Image(entry.data[0])
+                    img.height = entry.size[0] # insert image height in pixels as float or int (e.g. 305.5) 
+                    img.width = entry.size[1] # insert image width in pixels as float or int (e.g. 405.8)
+                    img.anchor = anchor # where you want image to be anchored/start from 'A1'
+>>>>>>> 08692c939fdf1334661611f12797957a44de86f3
                     self.workBook.active.add_image(img) # adding in the image
 
             self.entryList.remove(entry)
