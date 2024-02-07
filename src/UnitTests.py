@@ -61,6 +61,7 @@ class StylingUnitTest(object):
 
 class DataEntryTest(object):
 
+<<<<<<< HEAD
     def entryInstanceTest(self): # Test Passed
         wb = Workbook()
         wb.save(SystemInfo.CURRENT_PATH + "sample.xlsx") # to clear file
@@ -382,4 +383,10 @@ class DataEntryTest(object):
         pass
 
 
+=======
+    def entryInstanceTest():
+        cellType = SheetDataEnum.Cell
+        
+        pass
+>>>>>>> 08692c939fdf1334661611f12797957a44de86f3
 # Todo: add commenting, refactor for performance, clean up
