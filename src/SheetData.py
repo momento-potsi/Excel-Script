@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 from openpyxl.drawing.image import Image
@@ -24,11 +24,13 @@ class SheetDataEnum(Enum):
 class SheetDataEntry:
     dataType: SheetDataEnum = SheetDataEnum.Cell
     
-    style: StyleConfig = StyleConfig (
-        currentFont = DEFAULT_FONT, 
-        currentBorder = DEFAULT_BORDER, 
-        currentFill = DEFAULT_FILL, 
-        currentAlignment = DEFAULT_ALIGNMENT
+    # Had to use field because making dataclass with a mutable field makes python whiny
+    style: StyleConfig = field( default_factory = StyleConfig ( 
+            currentFont = DEFAULT_FONT, 
+            currentBorder = DEFAULT_BORDER, 
+            currentFill = DEFAULT_FILL, 
+            currentAlignment = DEFAULT_ALIGNMENT
+        )
     )
     
     cellStart: (int, int) = (1, 1) # row, column
@@ -148,8 +150,8 @@ class ExcelSheetData(object):
                             entry.cellStart = tuple(temp)
                     elif len(entry.data) <= (entry.cellEnd[1] - entry.cellStart[1]): # repeat last data for remaining cells
                         for x in range(entry.cellEnd[1] - entry.cellStart[1]): # subtract columns
-                            if x > len(entry.data):
-                                formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[1], entry.data[x - 1])
+                            if x > len(entry.data): # insert last data element for remaining cells
+                                formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[1], entry.data[len(entry.data) - 1])
                             else:
                                 formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1])
                             temp = list(entry.cellStart)
@@ -168,7 +170,7 @@ class ExcelSheetData(object):
                     elif len(entry.data) <= (entry.cellEnd[0] - entry.cellStart[0]): # repeat last data for remaining cells
                         for x in range(entry.cellEnd[0] - entry.cellStart[0]): # subtract columns
                             if x > len(entry.data):
-                                formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[1], entry.data[x - 1])
+                                formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[1], entry.data[len(entry.data) - 1])
                             else:
                                 formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1])
                             temp = list(entry.cellStart)
