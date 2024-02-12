@@ -138,7 +138,8 @@ class ExcelSheetData(object):
                     formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[0])
 
                 case SheetDataEnum.MergedCell:
-                    self.workBook.active.merge_cell((entry.toCellStr(self.workBook))[0], (entry.toCellStr(self.workBook))[1])
+                    # Must use int coordinates for merge cell function 
+                    self.workBook.active.merge_cells(start_row = entry.cellStart[0], start_column = entry.cellStart[1], end_row = entry.cellEnd[0], end_column = entry.cellEnd[1])
                     formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[0])
 
                 case SheetDataEnum.Row:

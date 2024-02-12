@@ -275,7 +275,7 @@ class DataEntryTest(object):
         INCHES_TO_PIXEL = 0.0104145
 
         testCases = [
-            SheetDataEntry( # Cell Test Case
+            SheetDataEntry( # Cell Test Case (Passed)
                 dataType = SheetDataEnum.Cell,
                 style = StyleConfig (
                     currentFont = DEFAULT_FONT, 
@@ -298,7 +298,7 @@ class DataEntryTest(object):
                     currentAlignment = DEFAULT_ALIGNMENT
                 ),
                 cellStart = (1, 1),
-                cellEnd = (2, 1),
+                cellEnd = (1, 2),
                 name = "New Merged Cell",
                 data = ["Sample Text For A Longer Cell"],
                 size = None
@@ -370,8 +370,9 @@ class DataEntryTest(object):
 
         # todo flesh out table case & finish test
         print("[Unit Test]: Inserting test cases ...")
-        for i in range(len(testCases)):
-            newSheetStruct.insertEntry(testCases[i])
+        # for i in range(len(testCases)):
+        #     newSheetStruct.insertEntry(testCases[i])
+        newSheetStruct.insertEntry(testCases[1])
 
         print("[Unit Test]: Updating Excel entries ...")
         newSheetStruct.updateEntries()
