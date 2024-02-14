@@ -151,8 +151,11 @@ class ExcelSheetData(object):
                             entry.cellStart = tuple(temp)
                     elif len(entry.data) <= (entry.cellEnd[1] - entry.cellStart[1]): # repeat last data for remaining cells
                         for x in range(entry.cellEnd[1] - entry.cellStart[1]): # subtract columns
-                            if x > len(entry.data): # insert last data element for remaining cells
-                                formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[1], entry.data[len(entry.data) - 1])
+                            if x > len(entry.data): # insert last data element for remaining cells --> entry.data[len(entry.data) - 1]
+                                newCell = (entry.cellStart[0], len(entry.data) + x)
+                                newEntry = entry
+                                newEntry.cellEnd = newCell
+                                formatWrite(self.workBook, entry.style, (newEntry.toCellStr(self.workBook))[1], "[Undefined Element]")
                             else:
                                 formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1])
                             temp = list(entry.cellStart)

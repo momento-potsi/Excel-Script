@@ -289,7 +289,7 @@ class DataEntryTest(object):
                 data = ["Sample Text"],
                 size = None
             ),
-            SheetDataEntry( # MergedCell Test Case
+            SheetDataEntry( # MergedCell Test Case (Passed)
                 dataType = SheetDataEnum.MergedCell,
                 style = StyleConfig (
                     currentFont = DEFAULT_FONT, 
@@ -303,7 +303,7 @@ class DataEntryTest(object):
                 data = ["Sample Text For A Longer Cell"],
                 size = None
             ),
-            SheetDataEntry( # Row Test Case
+            SheetDataEntry( # Row Test Case 
                 dataType = SheetDataEnum.Row,
                 style = StyleConfig (
                     currentFont = DEFAULT_FONT, 
@@ -372,7 +372,7 @@ class DataEntryTest(object):
         print("[Unit Test]: Inserting test cases ...")
         # for i in range(len(testCases)):
         #     newSheetStruct.insertEntry(testCases[i])
-        newSheetStruct.insertEntry(testCases[1])
+        newSheetStruct.insertEntry(testCases[2])
 
         print("[Unit Test]: Updating Excel entries ...")
         newSheetStruct.updateEntries()
