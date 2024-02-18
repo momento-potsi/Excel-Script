@@ -33,13 +33,13 @@ class SheetDataEntry:
         )
     )
     
-    cellStart: (int, int) = (1, 1) # row, column
-    cellEnd: (int, int) = (1, 1) # row, column
-    name: str = "Empty Cell"
-    tableData: list[list[str]] = None
-    data: list[str] | None = None
-    size: (float, float) = None
-    anchor: str = None
+    cellStart: tuple[int, int]     = (1, 1) # row, column
+    cellEnd:   tuple[int, int]     = (1, 1) # row, column
+    name:      str                 = "Empty Cell"
+    tableData: list[list[str]]     = None
+    data:      list[str] | None    = None
+    size:      tuple[float, float] = None
+    anchor:    str                 = None
 
     def checkEntryType(self):
         match self.dataType:
@@ -71,7 +71,7 @@ class SheetDataEntry:
                     print("[warn] Content entered may not be consistent with entry Type { ", self.dataType.name, " }") 
                 pass
 
-    def toCellStr(self, wb: Workbook) -> (str, str): # start, end
+    def toCellStr(self, wb: Workbook) -> tuple[str, str]: # start, end
         start = wb.active.cell(row = self.cellStart[0], column = self.cellStart[1]).coordinate
         end = wb.active.cell(row = self.cellEnd[0], column = self.cellEnd[1]).coordinate
         return (start, end)
@@ -143,21 +143,24 @@ class ExcelSheetData(object):
                     formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[0])
 
                 case SheetDataEnum.Row:
-                    if (len(entry.data) == (entry.cellEnd[1] - entry.cellStart[1])) or (len(entry.data) >= (entry.cellEnd[1] - entry.cellStart[1])):
-                        for x in range(entry.cellEnd[1] - entry.cellStart[1]): # subtract columns
+                    if (len(entry.data) >= (entry.cellEnd[1] - entry.cellStart[1] + 1)):
+                        for x in range(entry.cellEnd[1] - entry.cellStart[1] + 1): # subtract columns
                             formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1])
                             temp = list(entry.cellStart)
                             temp[1] += 1
                             entry.cellStart = tuple(temp)
-                    elif len(entry.data) <= (entry.cellEnd[1] - entry.cellStart[1]): # repeat last data for remaining cells
-                        for x in range(entry.cellEnd[1] - entry.cellStart[1]): # subtract columns
-                            if x > len(entry.data): # insert last data element for remaining cells --> entry.data[len(entry.data) - 1]
+                            print("[Iteration ~ Within Range] (" + str(x) + ") --> " + "{ `Cell Location`: " + (entry.toCellStr(self.workBook))[0] + " }")
+                    elif len(entry.data) < (entry.cellEnd[1] - entry.cellStart[1] + 1): # repeat last data for remaining cells
+                        for x in range(entry.cellEnd[1] - entry.cellStart[1] + 1): # subtract columns
+                            if x >= len(entry.data): # insert last data element for remaining cells --> entry.data[len(entry.data) - 1]
                                 newCell = (entry.cellStart[0], len(entry.data) + x)
                                 newEntry = entry
                                 newEntry.cellEnd = newCell
-                                formatWrite(self.workBook, entry.style, (newEntry.toCellStr(self.workBook))[1], "[Undefined Element]")
+                                formatWrite(self.workBook, entry.style, (newEntry.toCellStr(self.workBook))[0], "[Undefined Element]")
+                                print("[Iteration ~ Out Of Range] (" + str(x) + ") --> " + "{ `Cell Location`: " + (newEntry.toCellStr(self.workBook))[0] + " }")
                             else:
-                                formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1])
+                                formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x])
+                                print("[Iteration ~ Within Range] (" + str(x) + ") --> " + "{ `Cell Location`: " + (entry.toCellStr(self.workBook))[0] + " }")
                             temp = list(entry.cellStart)
                             temp[1] += 1
                             entry.cellStart = tuple(temp)
@@ -165,6 +168,8 @@ class ExcelSheetData(object):
                         pass
 
                 case SheetDataEnum.Column: 
+                    # get entry.data size, if less than diff of entry.cells, append None or "" to entry.data
+                    # no need to check for size later.
                     if (len(entry.data) == (entry.cellEnd[0] - entry.cellStart[0])) or (len(entry.data) >= (entry.cellEnd[0] - entry.cellStart[0])):
                         for x in range(entry.cellEnd[0] - entry.cellStart[0]): # subtract rows
                             formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1])
