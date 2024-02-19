@@ -6,7 +6,7 @@ from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl import Workbook, load_workbook
 
-from SystemInfo import CURRENT_PATH
+from SystemInfo import CURRENT_PATH, BUILD_MODE
 from Styling import DEFAULT_ALIGNMENT, DEFAULT_BORDER, DEFAULT_FILL, DEFAULT_FONT, StyleConfig, formatWrite, ColorPalette
 
 
@@ -142,46 +142,54 @@ class ExcelSheetData(object):
                     self.workBook.active.merge_cells(start_row = entry.cellStart[0], start_column = entry.cellStart[1], end_row = entry.cellEnd[0], end_column = entry.cellEnd[1])
                     formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[0])
 
-                case SheetDataEnum.Row:
-                    if (len(entry.data) >= (entry.cellEnd[1] - entry.cellStart[1] + 1)):
-                        for x in range(entry.cellEnd[1] - entry.cellStart[1] + 1): # subtract columns
-                            formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1])
-                            temp = list(entry.cellStart)
-                            temp[1] += 1
-                            entry.cellStart = tuple(temp)
-                            print("[Iteration ~ Within Range] (" + str(x) + ") --> " + "{ `Cell Location`: " + (entry.toCellStr(self.workBook))[0] + " }")
-                    elif len(entry.data) < (entry.cellEnd[1] - entry.cellStart[1] + 1): # repeat last data for remaining cells
-                        for x in range(entry.cellEnd[1] - entry.cellStart[1] + 1): # subtract columns
-                            if x >= len(entry.data): # insert last data element for remaining cells --> entry.data[len(entry.data) - 1]
-                                newCell = (entry.cellStart[0], len(entry.data) + x)
-                                newEntry = entry
-                                newEntry.cellEnd = newCell
-                                formatWrite(self.workBook, entry.style, (newEntry.toCellStr(self.workBook))[0], "[Undefined Element]")
-                                print("[Iteration ~ Out Of Range] (" + str(x) + ") --> " + "{ `Cell Location`: " + (newEntry.toCellStr(self.workBook))[0] + " }")
+                case SheetDataEnum.Row: # Finally fixed `elif` case, see comments below for explanation.
+                    # Note: Must add 1 to cell difference in order for iteration to be complete (Ex: Starts at 1, Ends at 10 but (10 - 1))
+                    if (len(entry.data) >= (entry.cellEnd[1] - entry.cellStart[1] + 1)): # If length of data is greater than row space provided
+                        for x in range(entry.cellEnd[1] - entry.cellStart[1] + 1): # Iterate through row length 
+                            formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1]) # (x - 1) to convert range to array index
+                            temp = list(entry.cellStart) # convert cellStart tuple to list in order to edit
+                            temp[1] += 1 # step cellStart forward an iteration
+                            entry.cellStart = tuple(temp) # convert back to tuple
+                    elif len(entry.data) < (entry.cellEnd[1] - entry.cellStart[1] + 1): # Else if data is smaller than row length given
+                        for x in range(entry.cellEnd[1] - entry.cellStart[1] + 1): # Iterate through row length
+                            if x >= len(entry.data): # If the current iter, `x`, exceeds the data array length 
+                                newCell = (entry.cellStart[0], entry.cellEnd[1] + x) # (row remains the same, column += iter)  
+                                newEntry = entry # create copy of entry
+                                newEntry.cellEnd = newCell # assign cellEnd to copy
+                                # Based on script mode fillin empty cells
+                                emptyCellStr = ""
+                                if BUILD_MODE == 'Debug':
+                                    emptyCellStr = "[Undefined Element]"
+                                formatWrite(self.workBook, entry.style, (newEntry.toCellStr(self.workBook))[0], emptyCellStr)
                             else:
                                 formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x])
-                                print("[Iteration ~ Within Range] (" + str(x) + ") --> " + "{ `Cell Location`: " + (entry.toCellStr(self.workBook))[0] + " }")
-                            temp = list(entry.cellStart)
+                                
+                            temp = list(entry.cellStart) # See above
                             temp[1] += 1
                             entry.cellStart = tuple(temp)
                     elif entry.data == None:
                         pass
 
-                case SheetDataEnum.Column: 
-                    # get entry.data size, if less than diff of entry.cells, append None or "" to entry.data
-                    # no need to check for size later.
-                    if (len(entry.data) == (entry.cellEnd[0] - entry.cellStart[0])) or (len(entry.data) >= (entry.cellEnd[0] - entry.cellStart[0])):
-                        for x in range(entry.cellEnd[0] - entry.cellStart[0]): # subtract rows
+                case SheetDataEnum.Column: # See `Row` case for logic explanation
+                    if (len(entry.data) >= (entry.cellEnd[0] - entry.cellStart[0] + 1)): 
+                        for x in range(entry.cellEnd[0] - entry.cellStart[0] + 1): 
                             formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1])
                             temp = list(entry.cellStart)
-                            temp[0] += 1
-                            entry.cellStart = tuple(temp)
-                    elif len(entry.data) <= (entry.cellEnd[0] - entry.cellStart[0]): # repeat last data for remaining cells
-                        for x in range(entry.cellEnd[0] - entry.cellStart[0]): # subtract columns
-                            if x > len(entry.data):
-                                formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[1], entry.data[len(entry.data) - 1])
+                            temp[0] += 1 
+                            entry.cellStart = tuple(temp) 
+                    elif len(entry.data) < (entry.cellEnd[0] - entry.cellStart[0] + 1): 
+                        for x in range(entry.cellEnd[0] - entry.cellStart[0] + 1): 
+                            if x >= len(entry.data):
+                                newCell = (entry.cellStart[0] + x, entry.cellEnd[1])  
+                                newEntry = entry 
+                                newEntry.cellEnd = newCell
+                                emptyCellStr = ""
+                                if BUILD_MODE == 'Debug':
+                                    emptyCellStr = "[Undefined Element]"
+                                formatWrite(self.workBook, entry.style, (newEntry.toCellStr(self.workBook))[0], emptyCellStr)
                             else:
-                                formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x - 1])
+                                formatWrite(self.workBook, entry.style, (entry.toCellStr(self.workBook))[0], entry.data[x])
+                                
                             temp = list(entry.cellStart)
                             temp[0] += 1
                             entry.cellStart = tuple(temp)

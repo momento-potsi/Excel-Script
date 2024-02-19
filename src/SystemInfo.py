@@ -8,6 +8,7 @@ DEFAULT_PATH_LINUX = "/home/tosin/"
 # End Platform
 
 CURRENT_PATH = None
+BUILD_MODE = 'Debug'
 
 match platform.node():
     case 'cardinal-sys22' :
